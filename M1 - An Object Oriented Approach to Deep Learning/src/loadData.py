@@ -13,6 +13,12 @@ from NeuralNet import NeuralNet
 # 0008     32 bit integer  28               number of rows
 # 0012     32 bit integer  28               number of columns
 
+IMG_WIDTH = 28
+IMG_HEIGHT = 28
+IMG_SIZE = IMG_WIDTH * IMG_HEIGHT
+PRINT_BYTE_ARRAY_AS_NUMBERS = True
+DRAW_THRESHOLD = 100 # if byte value (0-255) is above 100 consider it "on"
+
 def load_training_binary_file():
     net = NeuralNet()
     net.initialize_with_random_weights()
@@ -32,44 +38,36 @@ def load_training_binary_file():
         labels_magic_number = data_info[0]
         labels_number_of_items = data_info[1]
 
+        # meta info
         print(data_info)
         print(label_info)
 
-
         index = 16
         label_index = 8
-        bleh = False
+        
         for number in range(0, number_of_images):
-            byte_array = struct.unpack('B' * 28 * 28, fileContent[index: index + 28 * 28])
+            byte_array = struct.unpack('B' * IMG_SIZE, fileContent[index: index + IMG_SIZE])
             
-            # print(label_index)
             try:
                 label = struct.unpack('B', labels_file_content[label_index: label_index + 1])[0]
             except:
                 x = 0
-                # print(label_index, len(labels_file_content))
-            if bleh == False:
+            if PRINT_BYTE_ARRAY_AS_NUMBERS:
+                print("label: ", label)
                 print_byte_array_like_a_number(byte_array)
                 net.input_image(byte_array, label)
-                bleh = True
-
-            
 
             label_index += 1
-            index += 1
-            if label_index < 15:
-                print(label, end=" ")
-            # print(len(byte_array))
-            # print(byte_array)
-            # print("---------------------------------")
-                # print(fileContent)
+            index += IMG_SIZE
+            print("\n---------------------------------")
 
 
 def print_byte_array_like_a_number(row_data):
     for index, byte in enumerate(row_data):
-        if index % 28 == 0:
+        # newline
+        if index % IMG_WIDTH == 0:
             print("")
-        if byte > 100:
+        if byte > DRAW_THRESHOLD:
             print("1", end="")
         else:
             print("0", end="")
